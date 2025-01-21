@@ -44,7 +44,7 @@ fs.mkdir(path.join(__dirname, 'project-dist', 'assets'), (err) => {
   }
 });
 
-/* function copyAssets() {
+function copyAssets() {
   const pathToFolder = path.join(__dirname, 'assets');
   fs.promises
     .readdir(pathToFolder, { withFileTypes: true })
@@ -55,19 +55,42 @@ fs.mkdir(path.join(__dirname, 'project-dist', 'assets'), (err) => {
         'assets',
       );
       for (let file of filenames) {
-        const currFile = path.join(file.path, file.name);
-        if (file.isDirectory()) {
-        }
-        const copyFolderFile = path.join(pathCopyFilesFolder, file.name);
-        fs.copyFile(currFile, copyFolderFile, (err) => {
+        fs.mkdir(path.join(pathCopyFilesFolder, file.name), (err) => {
           if (err) {
-            console.log(err);
+            return;
           }
         });
+      }
+      return filenames;
+    })
+    .then((filenames) => {
+      /* console.log(filenames); */
+      for (let folder of filenames) {
+        const pathCopyFilesFolder = path.join(
+          __dirname,
+          'project-dist',
+          'assets',
+        );
+        const pathToFolder = path.join(__dirname, 'assets');
+        let currFile = path.join(pathToFolder, folder.name);
+        fs.promises
+          .readdir(currFile, { withFileTypes: true })
+          .then((readFolder) => {
+            /* console.log(readFolder); */
+            for (let file of readFolder) {
+              currFile = path.join(pathToFolder, folder.name, file.name);
+              const pathToCopyFile = path.join(
+                pathCopyFilesFolder,
+                folder.name,
+                file.name,
+              );
+              fs.promises.copyFile(currFile, pathToCopyFile);
+            }
+          });
       }
     })
     .catch((err) => {
       console.log(err);
     });
 }
-copyAssets(); */
+copyAssets();

@@ -94,3 +94,37 @@ function copyAssets() {
     });
 }
 copyAssets();
+
+// create index.html and copy content from template.html in index.html
+const pathToTemplate = path.join(__dirname, 'template.html');
+fs.promises.copyFile(
+  pathToTemplate,
+  path.join(__dirname, 'project-dist', 'index.html'),
+);
+// add components in index.html file
+async function fillIndexHtmlFile() {
+  const pathIndexFile = path.join(__dirname, 'project-dist', 'index.html');
+
+  const components = await fs.promises.readdir(
+    path.resolve(__dirname, 'components'),
+    { withFileTypes: true },
+  );
+  for (let component of components) {
+    const pathToComponentsFile = path.resolve(
+      path.resolve(__dirname, 'components'),
+      component.name,
+    );
+    let textIndexFile = await fs.promises.readFile(pathIndexFile);
+    /* console.log(textIndexFile); */
+    if (component.isFile() && path.extname(pathToComponentsFile) === '.html') {
+      const textComponent = await fs.promises.readFile(pathToComponentsFile);
+      const componentName = component.name.split('.')[0];
+      textIndexFile = textIndexFile
+        .toString()
+        .replace(`{{${componentName}}}`, textComponent);
+      /* console.log(textIndexFile); */
+      await fs.promises.writeFile(pathIndexFile, textIndexFile);
+    }
+  }
+}
+fillIndexHtmlFile();
